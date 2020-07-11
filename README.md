@@ -12,5 +12,12 @@ For cloning this repository, please run the following command:
         or
     $ git clone https://github.com/caio-cacador/OpenDoorWithFaceRecognition.git
     
+Get the Dlib files at the link:
+
+    $ http://dlib.net/files/dlib_face_recognition_resnet_model_v1.dat.bz2
+    $ http://dlib.net/files/shape_predictor_68_face_landmarks.dat.bz2
+    
+and extract the files in `project.../sources`
+
 ### Changes
 * v1.0.0 - Added the function for open and close the door

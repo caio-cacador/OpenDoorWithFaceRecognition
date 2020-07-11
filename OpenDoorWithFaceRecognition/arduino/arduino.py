@@ -1,41 +1,67 @@
-import serial
-
-from OpenDoorWithFaceRecognition.arduino.constants import UNLOCK_DOOR, LOCK_DOOR, TURN_LIGHT_ON, TURN_LIGHT_OFF
-
-DOORS_COMMANDS_MAP = {UNLOCK_DOOR: '1',
-                      LOCK_DOOR:   '2'}
-
-LIGHT_COMMANDS_MAP = {TURN_LIGHT_ON:  '1',
-                      TURN_LIGHT_OFF: '2'}
+from pyfirmata import Arduino as PyfirmataArduino, util
+from time import sleep
 
 
-class Arduino:
+class Arduino():
 
-    def __init__(self):
-        self.arduino = serial.Serial()
-        self.arduino.baudrate = 9600
-        self.arduino.port = 'COM3'
-        self.arduino.open()
+    _UNLOCK_POSITION = 0
+    _LOCK_POSITION = 170
 
-        self.door_status = UNLOCK_DOOR
-        self.light_status = TURN_LIGHT_OFF
+    def __init__(self, configs: dict):
+        arduino = PyfirmataArduino(configs['usb_port'])
+        print('Arduino is online!')
+        it = util.Iterator(arduino)
+        it.start()
 
-    def __del__(self):
-        self.arduino.close()
+        self._btn_door = arduino.get_pin('d:6:i')
+        self._btn_door.enable_reporting()
+        self._btn_outside = arduino.get_pin('d:5:i')
+        self._btn_outside.enable_reporting()
+        self._btn_inside = arduino.get_pin('d:4:i')
+        self._btn_inside.enable_reporting()
 
-    def send_command(self, command: str):
-        if DOORS_COMMANDS_MAP.get(command):
-            command_value = DOORS_COMMANDS_MAP[command]
-            if self.door_status != command_value:
-                self.arduino.write(b'{}'.__format__(command_value))
-                self.door_status = command_value
+        self._servo_motor = arduino.get_pin('d:9:s')
+        self._servo_motor.write(0)
+        self._servo_position = 0
+        self._servo_is_in_use = False
 
-        elif LIGHT_COMMANDS_MAP.get(command):
-            command_value = LIGHT_COMMANDS_MAP[command]
-            if self.light_status != command_value:
-                self.arduino.write(b'{}'.__format__(command_value))
-                self.light_status = command_value
+    def get_btn_door_status(self) -> bool:
+        return self._btn_door.read()
 
+    def get_btn_outside_status(self) -> bool:
+        return self._btn_outside.read()
 
-    # def read_status(self):
-    #     self.arduino.read_all()
+    def get_btn_inside_status(self) -> bool:
+        return self._btn_inside.read()
+
+    def unlock_door(self):
+        if self._servo_is_in_use is False:
+            self._servo_is_in_use = True
+            if self.get_btn_door_status() and self._servo_position > self._UNLOCK_POSITION:
+                print('[-] Destrancando a porta')
+                while self._servo_position > self._UNLOCK_POSITION:
+                    self._servo_position -= 2
+                    self._servo_motor.write(self._servo_position)
+                    sleep(0.02)
+                sleep(3)
+            else:
+                print('[-] A porta ja esta destrancada')
+            self._servo_is_in_use = False
+
+    def lock_door(self):
+        if self._servo_is_in_use is False:
+            self._servo_is_in_use = True
+            if self.get_btn_door_status() and not (self.get_btn_outside_status() or self.get_btn_inside_status())\
+                    and self._servo_position < self._LOCK_POSITION:
+                print('[-] Trancando a porta')
+                while self._servo_position < self._LOCK_POSITION:
+                    self._servo_position += 2
+                    self._servo_motor.write(self._servo_position)
+                    sleep(0.02)
+                sleep(1)
+            else:
+                print('[-] Porta ja esta trancada')
+            self._servo_is_in_use = False
+
+# a = Arduino('/dev/ttyUSB0')
+# a.run()

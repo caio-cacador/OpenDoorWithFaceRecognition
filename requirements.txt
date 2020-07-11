@@ -1,3 +1,6 @@
-pyserial
+telepot
+pyfirmata
 numpy
 opencv-python
+dlib
+ujson
