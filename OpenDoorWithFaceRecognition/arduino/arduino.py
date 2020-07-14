@@ -4,7 +4,7 @@ from time import sleep
 
 class Arduino:
 
-    _UNLOCK_POSITION = 0 # mudar pra config
+    _UNLOCK_POSITION = 0
     _LOCK_POSITION = 170
 
     def __init__(self, configs: dict):

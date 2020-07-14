@@ -10,7 +10,7 @@ if __name__ == "__main__":
 
     configs = ujson.load(open('configs.json', 'r'))
 
-    recognition = Recognition()
+    recognition = Recognition(configs=configs['recognition_configs'])
     arduino = Arduino(configs=configs['arduino_configs'])
     telegram = Telegram(configs=configs['telegram_configs'])
     video = Video(cam_configs=configs['cam_configs'])
