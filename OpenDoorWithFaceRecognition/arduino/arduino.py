@@ -37,7 +37,7 @@ class Arduino():
     def unlock_door(self):
         if self._servo_is_in_use is False:
             self._servo_is_in_use = True
-            if self.get_btn_door_status() and self._servo_position > self._UNLOCK_POSITION:
+            if self._servo_position > self._UNLOCK_POSITION:
                 print('[-] Destrancando a porta')
                 while self._servo_position > self._UNLOCK_POSITION:
                     self._servo_position -= 2
@@ -51,8 +51,7 @@ class Arduino():
     def lock_door(self):
         if self._servo_is_in_use is False:
             self._servo_is_in_use = True
-            if self.get_btn_door_status() and not (self.get_btn_outside_status() or self.get_btn_inside_status())\
-                    and self._servo_position < self._LOCK_POSITION:
+            if self._servo_position < self._LOCK_POSITION:
                 print('[-] Trancando a porta')
                 while self._servo_position < self._LOCK_POSITION:
                     self._servo_position += 2

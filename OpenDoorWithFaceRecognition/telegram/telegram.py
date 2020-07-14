@@ -71,11 +71,10 @@ class Telegram:
                 attempts -= 1
                 if self.get_last_message in ['sim', 'pode']:
                     return True
-                elif self.get_last_message in ['nao', 'não']:
-                    self.send_message(text='Tudo bem, nao vou abrir.', chat_id=chat_id)
+                elif self.get_last_message in ['nao', 'não', 'nao pode', 'não pode']:
                     return False
                 else:
-                    self.send_message(text="Por favor, responda com sim ou não.", chat_id=chat_id)
+                    self.send_message(text="Por favor, responda com 'sim' ou 'não'.", chat_id=chat_id)
                     self._last_message = None
         return False
 
