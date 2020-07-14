@@ -3,7 +3,7 @@ import pickle
 import dlib
 import cv2
 import numpy as np
-from OpenDoorWithFaceRecognition.sources.constants import BASE_DIR, MEDIA_ROOT, SOURCES
+from OpenDoorWithFaceRecognition.sources.constants import MEDIA_ROOT, SOURCES
 
 
 class Trainer:
@@ -48,7 +48,7 @@ class Trainer:
                     descritoresFaciais = np.concatenate((descritoresFaciais, npArrayDescritorFacial), axis=0)
                 indice[count] = person
 
-        np.save(path.join(SOURCES, "descritores_rn.npy"), descritoresFaciais)
+        np.save(path.join(SOURCES, "descriptors_rn.npy"), descritoresFaciais)
         pickle_out = open(path.join(SOURCES, "persons.pickle"), 'wb')
         pickle.dump(indice, pickle_out)
         pickle_out.close()

@@ -1,9 +1,6 @@
-from collections import namedtuple
 from telepot import Bot, exception
 from telepot.loop import MessageLoop
 import cv2
-
-LastMassageNamedtuple = namedtuple('LastMassage', ['chat_id', 'text'])
 
 
 class BuffImage:
@@ -25,29 +22,22 @@ class Telegram:
         self._accepted_names = configs['accepted_names']
         self._bot_name = configs['bot_name']
 
-        self._last_message = None
-
+        self.last_message = None
         MessageLoop(self.bot, self._handle).run_as_thread()
-
-    @property
-    def get_last_message(self):
-        return self._last_message.text if self._last_message else ''
 
     def _handle(self, msg):
         if msg:
             chat_id = msg['chat']['id']
             first_name = msg['from']['first_name']
             message = str(msg.get('text', ''))
-            first_world = message[:len(self._bot_name)] if len(message) > (len(self._bot_name)+1) else None
+            first_world = message[:len(self._bot_name)] if len(message) > len(self._bot_name) else None
 
             print(f"[-] ({chat_id}: ') >> {first_name} sent: {message}")
 
-            print(f'first_world >> {first_world}')
-
             if first_world and first_world.lower() in self._accepted_names:
-                message = message[len(self._bot_name)+1:]
-                print(f'message >> {message}')
-                self._last_message = LastMassageNamedtuple(chat_id=chat_id, text=message.lower())
+                message = message[len(self._bot_name):]
+                print(f'message to monica >> {message}')
+                self._last_message = message.strip().lower()
 
     def send_photo(self, image, name: str = 'photo.png', _type: str = '.PNG', chat_id: int = None):
         if not chat_id:
@@ -64,31 +54,16 @@ class Telegram:
 
     def send_bool_question(self, question: str, chat_id: int = None):
         attempts = 3
-        self._last_message = None
+        self.last_message = None
         self.send_message(text=question, chat_id=chat_id)
         while attempts > 0:
-            if self.get_last_message:
+            if self.last_message:
                 attempts -= 1
-                if self.get_last_message in ['sim', 'pode']:
+                if self.last_message in ['sim', 'pode']:
                     return True
-                elif self.get_last_message in ['nao', 'não', 'nao pode', 'não pode']:
+                elif self.last_message in ['nao', 'não', 'nao pode', 'não pode']:
                     return False
                 else:
                     self.send_message(text="Por favor, responda com 'sim' ou 'não'.", chat_id=chat_id)
-                    self._last_message = None
+                    self.last_message = None
         return False
-
-#
-# TOKEN = "891967726:AAF4iR0AknoObf_L-rwKIwjIxzeGtYdeTM4"
-#
-# bot = telepot.Bot(TOKEN)
-#
-# chat_id = -1001318092698
-#
-#
-#
-# cam = cv2.VideoCapture('rtsp://admin:XTKDRI@192.168.0.163/')
-# cam.grab()
-# (cam_status, frame) = cam.retrieve()
-# frame = cv2.resize(frame, (400, 300))
-#

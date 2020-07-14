@@ -40,5 +40,4 @@ if __name__ == "__main__":
             else:
                 arduino.lock_door()
 
-
         sleep(0.3)

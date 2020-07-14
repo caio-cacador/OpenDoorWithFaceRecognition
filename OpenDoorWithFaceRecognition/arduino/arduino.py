@@ -2,9 +2,9 @@ from pyfirmata import Arduino as PyfirmataArduino, util
 from time import sleep
 
 
-class Arduino():
+class Arduino:
 
-    _UNLOCK_POSITION = 0
+    _UNLOCK_POSITION = 0 # mudar pra config
     _LOCK_POSITION = 170
 
     def __init__(self, configs: dict):
@@ -61,6 +61,3 @@ class Arduino():
             else:
                 print('[-] Porta ja esta trancada')
             self._servo_is_in_use = False
-
-# a = Arduino('/dev/ttyUSB0')
-# a.run()
