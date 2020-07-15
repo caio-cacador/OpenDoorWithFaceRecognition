@@ -30,16 +30,16 @@ class Telegram:
             chat_id = msg['chat']['id']
             first_name = msg['from']['first_name']
             message = str(msg.get('text', ''))
-            first_world = message[:len(self._bot_name)] if len(message) > len(self._bot_name) else None
+            first_world = message[:len(self._bot_name)] if len(message) > len(self._bot_name) else ''
 
             print(f"[-] ({chat_id}: ') >> {first_name} sent: {message}")
 
-            if first_world and first_world.lower() in self._accepted_names:
+            if first_world.lower() == self._bot_name:
                 message = message[len(self._bot_name):]
                 print(f'message to monica >> {message}')
                 self._last_message = message.strip().lower()
 
-    def send_photo(self, image, name: str = 'photo.png', _type: str = '.PNG', chat_id: int = None):
+    def send_photo(self, image, name: str = 'photo.jpg', _type: str = '.JPG', chat_id: int = None):
         if not chat_id:
             chat_id = self._default_chat_id
         self.bot.sendPhoto(chat_id, (name, BuffImage(_type=_type, image=image)))
@@ -61,9 +61,9 @@ class Telegram:
                 attempts -= 1
                 if self.last_message in ['sim', 'pode']:
                     return True
-                elif self.last_message in ['nao', 'não', 'nao pode', 'não pode']:
+                elif self.last_message in ['nao', 'nao pode']:
                     return False
                 else:
-                    self.send_message(text="Por favor, responda com 'sim' ou 'não'.", chat_id=chat_id)
+                    self.send_message(text="Por favor, responda com 'sim' ou 'nao'.", chat_id=chat_id)
                     self.last_message = None
         return False

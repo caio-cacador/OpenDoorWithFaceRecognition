@@ -3,7 +3,7 @@ from threading import Thread
 import cv2
 
 
-class Video:
+class Camera:
 
     def __init__(self, cam_configs: dict):
         self.cam = cv2.VideoCapture(cam_configs['address'])
@@ -15,7 +15,7 @@ class Video:
                 self.cam.grab()
                 (cam_status, self.frame) = self.cam.retrieve()
 
-    def run(self, stream_video: bool = False):
+    def start_update(self, stream_video: bool = False):
         thread_update_cam = Thread(target=self.update_cam_attr, args=())
         thread_update_cam.start()
 
