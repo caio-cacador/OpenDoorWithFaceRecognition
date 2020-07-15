@@ -3,7 +3,7 @@ from telepot.loop import MessageLoop
 import cv2
 
 
-class BuffImage:
+class Buffer:
 
     def __init__(self, _type, image):
         self._type = _type
@@ -42,7 +42,7 @@ class Telegram:
     def send_photo(self, image, name: str = 'photo.jpg', _type: str = '.JPG', chat_id: int = None):
         if not chat_id:
             chat_id = self._default_chat_id
-        self.bot.sendPhoto(chat_id, (name, BuffImage(_type=_type, image=image)))
+        self.bot.sendPhoto(chat_id, (name, Buffer(_type=_type, image=image)))
 
     def send_message(self, text: str, chat_id: int = None):
         if not chat_id:
