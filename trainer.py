@@ -6,55 +6,48 @@ import numpy as np
 from OpenDoorWithFaceRecognition.sources.constants import MEDIA_ROOT, SOURCES
 
 
-class Trainer:
-    def __init__(self):
-        print('[+] Loading files...')
-        self.detectorFace = dlib.get_frontal_face_detector()
-        self.detectorPontos = dlib.shape_predictor(path.join(SOURCES, "shape_predictor_68_face_landmarks.dat"))
-        self.reconhecimentoFacial = dlib.face_recognition_model_v1(
-            path.join(SOURCES, "dlib_face_recognition_resnet_model_v1.dat"))
-        print('[-] Done.')
+print('[+] Loading files...')
+face_detector = dlib.get_frontal_face_detector()
+points_detector = dlib.shape_predictor(path.join(SOURCES, "shape_predictor_68_face_landmarks.dat"))
+face_recognition = dlib.face_recognition_model_v1(path.join(SOURCES, "dlib_face_recognition_resnet_model_v1.dat"))
 
-    def run(self):
-        print('[+] Training...')
-        indice = {}
-        descritoresFaciais = None
-        persons = [dir for dir in listdir(MEDIA_ROOT) if path.isdir(path.join(MEDIA_ROOT, dir))]
+print('[-] Done.')
 
-        for person in persons:
-            entire_path = path.join(MEDIA_ROOT, person)
-            print(' - Person: ', person)
-            for count, img_path in enumerate(listdir(entire_path)):
-                imagem = cv2.imread(path.join(entire_path, img_path))
+print('[+] Training...')
+indices = {}
+face_descriptors = None
+persons = [dir for dir in listdir(MEDIA_ROOT) if path.isdir(path.join(MEDIA_ROOT, dir))]
 
-                facesDetectadas = self.detectorFace(imagem, 1)
-                if len(facesDetectadas) != 1:
-                    raise ValueError('Foi detectado mais de uma face na foto: ', img_path)
+for person in persons:
+    person_path = path.join(MEDIA_ROOT, person)
+    print(' - Person: ', person)
+    for count, img_path in enumerate(listdir(person_path)):
+        image = cv2.imread(path.join(person_path, img_path))
 
-                face = facesDetectadas[0]
-                pontosFaciais = self.detectorPontos(imagem, face)
-                descritorFacial = self.reconhecimentoFacial.compute_face_descriptor(imagem, pontosFaciais)
+        detected_faces = face_detector(image)
+        if not detected_faces:
+            raise ValueError('Nao foi detectado nenhuma face na foto: ', img_path)
+        if len(detected_faces) > 1:
+            raise ValueError('Foi detectado mais de uma face na foto: ', img_path)
 
-                if not descritorFacial:
-                    ValueError('Nao foi possivel detectar nenhum ponto facial')
+        face = detected_faces[0]
+        face_points = points_detector(image, face)
+        face_descriptor = face_recognition.compute_face_descriptor(image, face_points)
 
-                listaDescritorFacial = [df for df in descritorFacial]
-                npArrayDescritorFacial = np.asarray(listaDescritorFacial, dtype=np.float64)
-                npArrayDescritorFacial = npArrayDescritorFacial[np.newaxis, :]
+        if not face_descriptor:
+            ValueError('Nao foi possivel detectar nenhum ponto facial')
 
-                if descritoresFaciais is None:
-                    descritoresFaciais = npArrayDescritorFacial
-                else:
-                    descritoresFaciais = np.concatenate((descritoresFaciais, npArrayDescritorFacial), axis=0)
-                indice[count] = person
+        np_array_face_descriptor = np.asarray(list(face_descriptor), dtype=np.float64)
+        np_array_face_descriptor = np_array_face_descriptor[np.newaxis, :]
 
-        np.save(path.join(SOURCES, "descriptors_rn.npy"), descritoresFaciais)
-        pickle_out = open(path.join(SOURCES, "persons.pickle"), 'wb')
-        pickle.dump(indice, pickle_out)
-        pickle_out.close()
-        print('[-] Done.')
+        if face_descriptors is None:
+            face_descriptors = np_array_face_descriptor
+        else:
+            face_descriptors = np.concatenate((face_descriptors, np_array_face_descriptor), axis=0)
+        indices[count] = person
 
-
-if __name__ == "__main__":
-    t = Trainer()
-    t.run()
+np.save(path.join(SOURCES, "descriptors_rn.npy"), face_descriptors)
+pickle_out = open(path.join(SOURCES, "persons.pickle"), 'wb')
+pickle.dump(indices, pickle_out)
+pickle_out.close()
+print('[-] Done.')
