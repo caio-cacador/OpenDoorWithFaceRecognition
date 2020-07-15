@@ -31,7 +31,7 @@ class Recognition:
                 obtained_distance = distance[minimum]
 
                 if obtained_distance <= self.minimal_similarity:
-                    nome = self.indices[minimum]
-                    return nome
+                    name = self.indices[minimum]
+                    return name
 
         return None
