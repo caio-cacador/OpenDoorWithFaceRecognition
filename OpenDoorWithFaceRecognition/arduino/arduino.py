@@ -4,8 +4,8 @@ from time import sleep
 
 class Arduino:
 
-    _UNLOCK_POSITION = 0
-    _LOCK_POSITION = 170
+    _UNLOCK_POSITION = 85
+    _LOCK_POSITION = 180
 
     def __init__(self, configs: dict):
         arduino = PyfirmataArduino(configs['usb_port'])
